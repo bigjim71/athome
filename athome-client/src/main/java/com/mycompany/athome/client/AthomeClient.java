@@ -5,13 +5,14 @@
  */
 package com.mycompany.athome.client;
 
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.config.ClientConfig;
-import com.sun.jersey.api.client.config.DefaultClientConfig;
-import com.sun.jersey.api.json.JSONConfiguration;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.glassfish.jersey.client.ClientResponse;
 
 
 
@@ -25,9 +26,7 @@ public class AthomeClient {
 
     public AthomeClient() {
 
-        ClientConfig clientConfig = new DefaultClientConfig();
-        clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);
-        this.client = Client.create(clientConfig);
+        this.client = ClientBuilder.newClient();
     }
     
     public Client getClient(){
@@ -38,10 +37,10 @@ public class AthomeClient {
   public void xxx(String[] args) {
 	try {
  
-		client = Client.create();
+		client = ClientBuilder.newClient();
  
-		WebResource webResource = client
-		   .resource("http://localhost:8000/echo");
+		WebTarget webResource = client
+		   .target("http://localhost:8000/echo");
 
  
 //		ClientResponse response = webResource.accept("application/json")
@@ -49,8 +48,8 @@ public class AthomeClient {
                 
 		String input = "{\"singer\":\"Metallica\",\"title\":\"Fade To Black\"}";
  
-		ClientResponse response = webResource.type(MediaType.APPLICATION_JSON)
-		   .post(ClientResponse.class, input);                
+		Response response = webResource.request(MediaType.APPLICATION_JSON)
+				.post(Entity.entity(input, MediaType.APPLICATION_JSON));                
  
 		if (response.getStatus() != 200) {
 		   throw new RuntimeException("Failed : HTTP error code : "
@@ -66,7 +65,7 @@ public class AthomeClient {
 //            get(MY_RESPONSE.class); 
 //MyReponse output = response.getEntity(MyResponse.class);                
  
-		String output = response.getEntity(String.class);
+		String output = response.readEntity(String.class);
  
 		System.out.println("Output from Server .... \n");
 		System.out.println(output);
