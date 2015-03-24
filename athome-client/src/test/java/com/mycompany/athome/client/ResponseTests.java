@@ -61,7 +61,7 @@ public class ResponseTests {
         // tell jersey not to care if we haven't mapped every property in the JSON
         JacksonJsonProvider jacksonJsonProvider = 
         	    new JacksonJaxbJsonProvider()
-        	        .configure(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES, false);
+        	        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
        	client.register(jacksonJsonProvider);           
         
         Response response = client
