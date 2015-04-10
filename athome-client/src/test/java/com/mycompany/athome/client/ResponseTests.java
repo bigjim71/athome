@@ -5,17 +5,21 @@
  */
 package com.mycompany.athome.client;
 
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.config.ClientConfig;
-import com.sun.jersey.api.client.config.DefaultClientConfig;
-import com.sun.jersey.api.json.JSONConfiguration;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import com.fasterxml.jackson.databind.DeserializationConfig;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
+import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
 /**
  *
@@ -51,21 +55,24 @@ public class ResponseTests {
     
 //        AthomeClient atc = new AthomeClient();
 //        Client client = atc.getClient();
-
-        ClientConfig clientConfig = new DefaultClientConfig();
-        clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);
-        Client client = Client.create(clientConfig);
-           
+        Client client = ClientBuilder.newClient();
+        // let jersey know about our entity
+        client.register(AthomeResponseEntity.class);
+        // tell jersey not to care if we haven't mapped every property in the JSON
+        JacksonJsonProvider jacksonJsonProvider = 
+        	    new JacksonJaxbJsonProvider()
+        	        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+       	client.register(jacksonJsonProvider);           
         
-        ClientResponse response = client
-                .resource("http://localhost:8000/echo")
-                .accept(MediaType.APPLICATION_JSON)
+        Response response = client
+                .target("http://localhost:8000/echo")
+                .request(MediaType.APPLICATION_JSON)
                 .header("content-type", MediaType.APPLICATION_JSON)
-                .get(ClientResponse.class);
+                .get();
         
         System.out.println("response length: "+ response.getLength());
-        
-        AthomeResponseEntity atRes = response.getEntity(AthomeResponseEntity.class);
+
+        AthomeResponseEntity atRes = response.readEntity(AthomeResponseEntity.class);
         
     }
 }
